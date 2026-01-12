@@ -6,7 +6,7 @@ data "oci_core_images" "system_image" {
 
 data "oci_core_images" "gpu_image" {
   compartment_id = var.tenancy_ocid
-  display_name = "Oracle-Linux-Gen2-GPU-9.6-2025.11.20-0"
+  display_name = "Oracle-Linux-8.10-Gen2-GPU-2025.11.20-0"
 }
 
 data "oci_identity_availability_domain" "ad" {
@@ -20,6 +20,9 @@ module "oci-hpc-oke" {
   # Works only with access to the root compartment
   create_policies = false
 
+  # Install the NVIDIA GPU operator later on
+  disable_gpu_device_plugin = true
+
   compartment_ocid = var.compartment_ocid
   tenancy_ocid = var.tenancy_ocid
 
@@ -28,5 +31,8 @@ module "oci-hpc-oke" {
   worker_ops_ad = data.oci_identity_availability_domain.ad.name
   worker_ops_image_custom_id = data.oci_core_images.system_image.images[0].id
 
-  # worker_gpu_image_custom_id = locals.gpu_image.id
+  worker_gpu_enabled = true
+  worker_gpu_ad = data.oci_identity_availability_domain.ad.name
+  worker_gpu_image_custom_id = data.oci_core_images.gpu_image.images[0].id
+  worker_gpu_pool_size = 1
 }
