@@ -17,6 +17,8 @@ data "oci_identity_availability_domain" "ad" {
 module "oci-hpc-oke" {
   source = "git::https://github.com/oracle-quickstart/oci-hpc-oke.git//terraform?ref=main"
 
+  ssh_public_key = var.ssh_public_key
+
   # Works only with access to the root compartment
   create_policies = false
 

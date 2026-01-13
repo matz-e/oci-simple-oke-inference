@@ -9,3 +9,7 @@ variable "compartment_ocid" {
 variable "region" {
   type = string
 }
+
+variable "ssh_public_key" {
+  type = string
+}
