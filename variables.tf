@@ -6,6 +6,10 @@ variable "compartment_ocid" {
   type = string
 }
 
+variable "image_ocid" {
+  type = string
+}
+
 variable "region" {
   type = string
 }

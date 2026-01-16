@@ -1,0 +1,24 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ include "sglang.fullname" . }}
+  labels:
+    {{- include "sglang.labels" . | nindent 4 }}
+provisioner: fss.csi.oraclecloud.com
+parameters:
+  availabilityDomain: {{ .Values.fss.ad }}
+  mountTargetSubnetOcid: {{ .Values.fss.subnet }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "sglang.fullname" . }}
+  labels:
+    {{- include "sglang.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: oci-fss
+  resources:
+    requests:
+      storage: 50Gi

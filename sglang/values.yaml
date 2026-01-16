@@ -1,0 +1,9 @@
+replicaCount: 1
+
+fss:
+  ad: ""
+  compartment: "ocid..."
+  subnet: "ocid..."
+
+service:
+  port: 80
