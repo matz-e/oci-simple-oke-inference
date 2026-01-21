@@ -10,6 +10,11 @@ variable "image_ocid" {
   type = string
 }
 
+variable "oke_image_ocid" {
+  type        = string
+  description = "Non-GPU image to use with customized node pools"
+}
+
 variable "region" {
   type = string
 }
