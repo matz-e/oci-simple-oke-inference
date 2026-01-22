@@ -40,4 +40,5 @@ terraform.rc
 
 # Terraform created file
 /values.yaml
-/storage.yaml
+/storage-bv.yaml
+/storage-fss.yaml

@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    oci = {
+      source  = "oracle/oci"
+      version = ">= 7.29.0"
+    }
+  }
+  required_version = "~> 1.14.3"
+}
+
+provider "oci" {
+}
+
 locals {
   multi_ad_pool_name = "piscine"
 }
@@ -44,6 +57,12 @@ module "oci-hpc-oke" {
   worker_gpu_pool_size       = 0
 }
 
+# resource "oci_core_network_security_group_security_rule" "a" {
+#   network_security_group_id = module.oci-hpc-oke.worker_nsg_id
+#   protocol                  = "tcp"
+#   direction = 
+# }
+
 resource "oci_containerengine_node_pool" "multi_ad_pool" {
   cluster_id     = module.oci-hpc-oke.cluster_id
   compartment_id = var.compartment_ocid
@@ -84,27 +103,28 @@ resource "oci_containerengine_node_pool" "multi_ad_pool" {
   }
 }
 
-locals {
-  rendered_helm_values = templatefile("${path.module}/values.yaml.tmpl", {
+resource "oci_file_storage_file_system" "file_system" {
+  availability_domain = data.oci_identity_availability_domain.ad.name
+  compartment_id      = var.compartment_ocid
 
-    ad               = data.oci_identity_availability_domain.ad.name
-    compartment_ocid = var.compartment_ocid
-    subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
-  })
-
-  rendered_storage_values = templatefile("${path.module}/storage.yaml.tmpl", {
-    pool_name = oci_containerengine_node_pool.multi_ad_pool.name
-  })
+  display_name = "File System for OKE"
 }
 
-resource "local_file" "helm_values" {
-  content         = local.rendered_helm_values
-  filename        = "${path.module}/values.yaml"
-  file_permission = "0666"
+resource "oci_file_storage_mount_target" "mount_target" {
+  availability_domain = data.oci_identity_availability_domain.ad.name
+  compartment_id      = var.compartment_ocid
+  subnet_id           = module.oci-hpc-oke.worker_subnet_id
+  nsg_ids             = [oci_core_network_security_group.fss_nsg.id]
+
+  display_name = "Mount Target for OKE"
 }
 
-resource "local_file" "storage_deployment" {
-  content         = local.rendered_storage_values
-  filename        = "${path.module}/storage.yaml"
-  file_permission = "0666"
+resource "oci_file_storage_export" "file_export" {
+  export_set_id  = oci_file_storage_mount_target.mount_target.export_set_id
+  file_system_id = oci_file_storage_file_system.file_system.id
+  path           = "/fss"
+}
+
+data "oci_core_private_ip" "mount_ip" {
+  private_ip_id = oci_file_storage_mount_target.mount_target.private_ip_ids[0]
 }
