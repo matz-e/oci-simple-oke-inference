@@ -8,23 +8,8 @@ locals {
   mount_target_cidr = "${data.oci_core_private_ip.mount_ip.ip_address}/32"
 }
 
-resource "oci_core_network_security_group_security_rule" "ingress_tcp" {
-  network_security_group_id = oci_core_network_security_group.fss_nsg.id
-  direction                 = "INGRESS"
-  protocol                  = "6" # TCP
-  source                    = module.oci-hpc-oke.worker_subnet_cidr
-  source_type               = "CIDR_BLOCK"
-  tcp_options {
-    destination_port_range {
-      min = 111
-      max = 111
-    }
-  }
-  stateless = false
-}
-
 resource "oci_core_network_security_group_security_rule" "ingress_tcp_multiports" {
-  count                     = 3
+  count                     = 4
   network_security_group_id = oci_core_network_security_group.fss_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
@@ -32,8 +17,8 @@ resource "oci_core_network_security_group_security_rule" "ingress_tcp_multiports
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = [2048, 2049, 2050][count.index]
-      max = [2048, 2049, 2050][count.index]
+      min = [111, 2048, 2049, 2050][count.index]
+      max = [111, 2048, 2049, 2050][count.index]
     }
   }
   stateless = false
