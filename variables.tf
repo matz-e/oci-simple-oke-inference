@@ -22,3 +22,13 @@ variable "region" {
 variable "ssh_public_key" {
   type = string
 }
+
+variable "kubernetes_version" {
+  type    = string
+  default = "v1.34.1"
+}
+
+variable "multi_ad_pool" {
+  type    = bool
+  default = false
+}

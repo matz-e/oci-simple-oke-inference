@@ -11,18 +11,9 @@ terraform {
 provider "oci" {
 }
 
-locals {
-  multi_ad_pool_name = "piscine"
-}
-
 data "oci_identity_availability_domain" "ad" {
   compartment_id = var.tenancy_ocid
   ad_number      = 1
-}
-
-data "oci_identity_availability_domain" "ad_alt" {
-  compartment_id = var.tenancy_ocid
-  ad_number      = 2
 }
 
 module "oci-hpc-oke" {
@@ -33,7 +24,7 @@ module "oci-hpc-oke" {
   # Works only with access to the root compartment
   create_policies = false
 
-  kubernetes_version = "v1.34.1"
+  kubernetes_version = var.kubernetes_version
 
   # Challenge requirements
   create_bastion     = false
@@ -57,74 +48,21 @@ module "oci-hpc-oke" {
   worker_gpu_pool_size       = 0
 }
 
-# resource "oci_core_network_security_group_security_rule" "a" {
-#   network_security_group_id = module.oci-hpc-oke.worker_nsg_id
-#   protocol                  = "tcp"
-#   direction = 
-# }
+module "multi_ad_pool" {
+  source = "./multi_ad_pool"
 
-resource "oci_containerengine_node_pool" "multi_ad_pool" {
-  cluster_id     = module.oci-hpc-oke.cluster_id
-  compartment_id = var.compartment_ocid
-  name           = local.multi_ad_pool_name
-  node_shape     = "VM.Standard.E5.Flex"
+  count = var.multi_ad_pool ? 1 : 0
 
-  kubernetes_version = "v1.34.1"
+  tenancy_ocid     = var.tenancy_ocid
+  compartment_ocid = var.compartment_ocid
+  subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
+  subnet_cidr      = module.oci-hpc-oke.worker_subnet_cidr
+  nsg_ocid         = module.oci-hpc-oke.worker_nsg_id
+  vcn_ocid         = module.oci-hpc-oke.vcn_id
 
-  node_config_details {
-    nsg_ids = [module.oci-hpc-oke.worker_nsg_id]
+  oke_cluster_ocid = module.oci-hpc-oke.cluster_id
+  oke_image_ocid   = var.oke_image_ocid
 
-    placement_configs {
-      availability_domain = data.oci_identity_availability_domain.ad.name
-      subnet_id           = module.oci-hpc-oke.worker_subnet_id
-    }
-    placement_configs {
-      availability_domain = data.oci_identity_availability_domain.ad_alt.name
-      subnet_id           = module.oci-hpc-oke.worker_subnet_id
-    }
-
-    size = 2
-  }
-
-  initial_node_labels {
-    key   = "oke.oraclecloud.com/pool.name"
-    value = local.multi_ad_pool_name
-  }
-
-  node_source_details {
-    image_id                = var.oke_image_ocid
-    source_type             = "IMAGE"
-    boot_volume_size_in_gbs = 100
-  }
-
-  node_shape_config {
-    memory_in_gbs = 32
-    ocpus         = 8
-  }
+  kubernetes_version = var.kubernetes_version
 }
 
-resource "oci_file_storage_file_system" "file_system" {
-  availability_domain = data.oci_identity_availability_domain.ad.name
-  compartment_id      = var.compartment_ocid
-
-  display_name = "File System for OKE"
-}
-
-resource "oci_file_storage_mount_target" "mount_target" {
-  availability_domain = data.oci_identity_availability_domain.ad.name
-  compartment_id      = var.compartment_ocid
-  subnet_id           = module.oci-hpc-oke.worker_subnet_id
-  nsg_ids             = [oci_core_network_security_group.fss_nsg.id]
-
-  display_name = "Mount Target for OKE"
-}
-
-resource "oci_file_storage_export" "file_export" {
-  export_set_id  = oci_file_storage_mount_target.mount_target.export_set_id
-  file_system_id = oci_file_storage_file_system.file_system.id
-  path           = "/fss"
-}
-
-data "oci_core_private_ip" "mount_ip" {
-  private_ip_id = oci_file_storage_mount_target.mount_target.private_ip_ids[0]
-}

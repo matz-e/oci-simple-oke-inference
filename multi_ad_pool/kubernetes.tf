@@ -3,7 +3,7 @@ locals {
 
     ad               = data.oci_identity_availability_domain.ad.name
     compartment_ocid = var.compartment_ocid
-    subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
+    subnet_ocid      = var.subnet_ocid
   })
 
   rendered_bv_storage_values = templatefile("${path.module}/storage-bv.yaml.tmpl", {

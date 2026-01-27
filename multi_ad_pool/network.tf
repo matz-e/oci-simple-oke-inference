@@ -1,7 +1,7 @@
 resource "oci_core_network_security_group" "fss_nsg" {
   compartment_id = var.compartment_ocid
   display_name   = "FSS NSG"
-  vcn_id         = module.oci-hpc-oke.vcn_id
+  vcn_id         = var.vcn_ocid
 }
 
 locals {
@@ -13,7 +13,7 @@ resource "oci_core_network_security_group_security_rule" "ingress_tcp_multiports
   network_security_group_id = oci_core_network_security_group.fss_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
-  source                    = module.oci-hpc-oke.worker_subnet_cidr
+  source                    = var.subnet_cidr
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
@@ -29,7 +29,7 @@ resource "oci_core_network_security_group_security_rule" "ingress_udp" {
   network_security_group_id = oci_core_network_security_group.fss_nsg.id
   direction                 = "INGRESS"
   protocol                  = "17" # UDP
-  source                    = module.oci-hpc-oke.worker_subnet_cidr
+  source                    = var.subnet_cidr
   source_type               = "CIDR_BLOCK"
   udp_options {
     destination_port_range {
