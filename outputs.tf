@@ -1,3 +1,15 @@
-output "access_k8s_public_endpoint" {
+output "access_information" {
   value = module.oci-hpc-oke.access_k8s_public_endpoint
+}
+
+data "oci_core_image" "oke" {
+  image_id = var.oke_image_ocid
+}
+
+output "self_managed_instance" {
+  value = var.self_managed_node ? {
+    ocid       = oci_core_instance.self-managed[0].id
+    cloud_init = local.manual_cloud_init
+    os_image   = data.oci_core_image.oke.display_name
+  } : null
 }

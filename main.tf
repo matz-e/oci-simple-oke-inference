@@ -66,3 +66,52 @@ module "multi_ad_pool" {
   kubernetes_version = var.kubernetes_version
 }
 
+locals {
+  encoded_cert      = base64encode(module.oci-hpc-oke.cluster_ca_cert)
+  endpoint_ip_match = regex("https://([0-9\\.]+):[0-9]+", module.oci-hpc-oke.cluster_private_endpoint)
+  endpoint_ip       = local.endpoint_ip_match[0]
+
+  manual_cloud_init = <<-EOS
+  #!/usr/bin/env bash
+  set -x
+  bash /etc/oke/oke-install.sh \
+    --apiserver-endpoint "${local.endpoint_ip}" \
+    --kubelet-ca-cert "${local.encoded_cert}"
+  sleep 30
+  systemctl status oke.service
+  cat /etc/oke/oke-install.sh
+  cat /etc/oke/oke.conf
+  cat /etc/kubernetes/ca.crt
+  EOS
+}
+
+resource "oci_core_instance" "self-managed" {
+  count = var.self_managed_node ? 1 : 0
+
+  availability_domain = data.oci_identity_availability_domain.ad.name
+  compartment_id      = var.compartment_ocid
+  shape               = "VM.Standard.E5.Flex"
+
+  shape_config {
+    ocpus         = 4
+    memory_in_gbs = 32
+  }
+
+  create_vnic_details {
+    assign_public_ip = false
+    subnet_id        = module.oci-hpc-oke.worker_subnet_id
+    subnet_cidr      = module.oci-hpc-oke.worker_subnet_cidr
+    nsg_ids          = [module.oci-hpc-oke.worker_nsg_id]
+  }
+
+  source_details {
+    source_type             = "image"
+    source_id               = var.oke_image_ocid
+    boot_volume_size_in_gbs = "100"
+  }
+
+  metadata = {
+    ssh_authorized_keys = var.ssh_public_key
+    user_data           = base64encode(local.manual_cloud_init)
+  }
+}

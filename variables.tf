@@ -32,3 +32,8 @@ variable "multi_ad_pool" {
   type    = bool
   default = false
 }
+
+variable "self_managed_node" {
+  type    = bool
+  default = false
+}
