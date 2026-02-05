@@ -41,6 +41,7 @@ module "oci-hpc-oke" {
 
   worker_ops_ad              = data.oci_identity_availability_domain.ad.name
   worker_ops_image_custom_id = var.image_ocid
+  worker_ops_pool_size       = 1
 
   worker_gpu_enabled         = true
   worker_gpu_ad              = data.oci_identity_availability_domain.ad.name

@@ -39,6 +39,7 @@ override.tf.json
 terraform.rc
 
 # Terraform created file
+/autoscaler.yaml
 /values.yaml
 /storage-bv.yaml
 /storage-fss.yaml
