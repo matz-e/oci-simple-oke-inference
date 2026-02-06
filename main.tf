@@ -49,6 +49,19 @@ module "oci-hpc-oke" {
   worker_gpu_pool_size       = 0
 }
 
+resource "oci_containerengine_addon" "certificate_addon" {
+  addon_name                       = "CertManager"
+  cluster_id                       = module.oci-hpc-oke.cluster_id
+  remove_addon_resources_on_delete = true
+}
+
+resource "oci_containerengine_addon" "metrics_addon" {
+  addon_name                       = "KubernetesMetricsServer"
+  cluster_id                       = module.oci-hpc-oke.cluster_id
+  remove_addon_resources_on_delete = true
+  depends_on                       = [oci_containerengine_addon.certificate_addon]
+}
+
 module "multi_ad_pool" {
   source = "./multi_ad_pool"
 

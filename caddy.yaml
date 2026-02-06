@@ -20,7 +20,10 @@ spec:
         - containerPort: 80
         - containerPort: 443
         resources:
+          limits:
+            cpu: "300m"
           requests:
+            cpu: "100m"
             memory: "1.5Gi"
 
 ---
