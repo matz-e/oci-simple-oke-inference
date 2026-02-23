@@ -1,9 +1,15 @@
 output "access_information" {
-  value = module.oci-hpc-oke.access_k8s_public_endpoint
+  value = {
+    kubectl = module.oci-hpc-oke.access_k8s_public_endpoint
+  }
 }
 
 data "oci_core_image" "oke" {
   image_id = var.oke_image_ocid
+}
+
+output "configured_images" {
+  value = data.oci_core_image.oke.display_name
 }
 
 output "self_managed_instance" {

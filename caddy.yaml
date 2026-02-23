@@ -13,9 +13,11 @@ spec:
       labels:
         app: caddy
     spec:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
       containers:
       - name: caddy
-        image: caddy:2
+        image: docker.io/library/caddy
         ports:
         - containerPort: 80
         - containerPort: 443

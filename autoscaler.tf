@@ -8,7 +8,7 @@ locals {
     "v1.34" = "1.34.2-252"
   }
 
-  region_key = lower(one([
+  region_code = lower(one([
     for r in data.oci_identity_regions.all.regions : r.key
     if r.name == var.region
   ]))
@@ -19,7 +19,7 @@ locals {
 
   rendered_scaler_template = templatefile("${path.module}/autoscaler.yaml.tmpl", {
     pool_ocid = local.pool_ocid
-    region    = local.region_key
+    region    = local.region_code
     image_tag = local.scaler_image_tags[local.kubernetes_major_minor]
   })
 }

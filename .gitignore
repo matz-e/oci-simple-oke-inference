@@ -43,3 +43,5 @@ terraform.rc
 /values.yaml
 /storage-bv.yaml
 /storage-fss.yaml
+/karpenter_resources.yaml
+/karpenter_values.yaml

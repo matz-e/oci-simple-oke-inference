@@ -1,0 +1,10 @@
+settings:
+  clusterCompartmentId: "${ compartment_ocid }"
+  vcnCompartmentId: "${ compartment_ocid }"
+  ociVcnIpNative: false
+  apiserverEndpoint: "${ endpoint_ip }"
+
+replicaCount: ${ replicas }
+
+image:
+  registry: "${ region_code }.ocir.io"
