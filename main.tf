@@ -129,3 +129,17 @@ resource "oci_core_instance" "self-managed" {
     user_data           = base64encode(local.manual_cloud_init)
   }
 }
+
+module "karpenter" {
+  source = "./karpenter"
+
+  count = var.karpenter_pool ? 1 : 0
+
+  endpoint_ip = local.endpoint_ip
+  region_code = local.region_code
+
+  compartment_ocid = var.compartment_ocid
+  nsg_ocid         = module.oci-hpc-oke.worker_nsg_id
+  oke_image_ocid   = var.oke_image_ocid
+  subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
+}

@@ -1,15 +1,15 @@
 locals {
   rendered_karpenter_values = templatefile("${path.module}/karpenter_values.yaml.tmpl", {
     compartment_ocid = var.compartment_ocid
-    region_code      = local.region_code
+    region_code      = var.region_code
     replicas         = 1
-    endpoint_ip      = local.endpoint_ip
+    endpoint_ip      = var.endpoint_ip
   })
 
   rendered_karpenter_resources = templatefile("${path.module}/karpenter_resources.yaml.tmpl", {
     image_ocid  = var.oke_image_ocid
-    subnet_ocid = module.oci-hpc-oke.worker_subnet_id
-    nsg_ocid    = module.oci-hpc-oke.worker_nsg_id
+    subnet_ocid = var.subnet_ocid
+    nsg_ocid    = var.nsg_ocid
   })
 }
 
