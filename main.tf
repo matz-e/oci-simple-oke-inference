@@ -143,3 +143,21 @@ module "karpenter" {
   oke_image_ocid   = var.oke_image_ocid
   subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
 }
+
+module "scheduling" {
+  source = "./scheduling"
+
+  count = var.scheduling_pools ? 1 : 0
+
+  tenancy_ocid     = var.tenancy_ocid
+  compartment_ocid = var.compartment_ocid
+  subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
+  subnet_cidr      = module.oci-hpc-oke.worker_subnet_cidr
+  nsg_ocid         = module.oci-hpc-oke.worker_nsg_id
+  vcn_ocid         = module.oci-hpc-oke.vcn_id
+
+  oke_cluster_ocid = module.oci-hpc-oke.cluster_id
+  oke_image_ocid   = var.oke_image_ocid
+
+  kubernetes_version = var.kubernetes_version
+}

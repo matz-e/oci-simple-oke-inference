@@ -1,0 +1,76 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: supreme-class
+value: 100
+globalDefault: false
+description: "This priority class should be used for higher class service pods only."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: low-class
+value: 1
+globalDefault: false
+description: "This priority class should be used for lower class service pods only."
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: low-caddy
+  labels:
+    app: caddy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caddy
+  template:
+    metadata:
+      labels:
+        app: caddy
+    spec:
+      priorityClassName: low-class
+      containers:
+      - name: caddy
+        image: docker.io/library/caddy
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            cpu: "9666m"
+          requests:
+            cpu: "9666m"
+            memory: "1.5Gi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supreme-caddy
+  labels:
+    app: caddy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caddy
+  template:
+    metadata:
+      labels:
+        app: caddy
+    spec:
+      priorityClassName: supreme-class
+      containers:
+      - name: caddy
+        image: docker.io/library/caddy
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            cpu: "9666m"
+          requests:
+            cpu: "9666m"
+            memory: "1.5Gi"

@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-caddy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caddy
+  template:
+    metadata:
+      labels:
+        app: caddy
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values: [10.140.32.150]
+      containers:
+      - name: caddy
+        image: docker.io/library/caddy
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            cpu: "2300m"
+          requests:
+            cpu: "2100m"
+            memory: "1.5Gi"
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "gpu"
+          effect: "NoSchedule"

@@ -42,3 +42,8 @@ variable "karpenter_pool" {
   type    = bool
   default = false
 }
+
+variable "scheduling_pools" {
+  type    = bool
+  default = false
+}

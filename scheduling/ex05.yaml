@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anti-caddy
+  labels:
+    app: caddy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: caddy
+  template:
+    metadata:
+      labels:
+        app: caddy
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: caddy
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: caddy
+        image: docker.io/library/caddy
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            cpu: "2300m"
+          requests:
+            cpu: "2100m"
+            memory: "1.5Gi"
