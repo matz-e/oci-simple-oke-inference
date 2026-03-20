@@ -11,10 +11,8 @@ locals {
   })
 
   rendered_fss_storage_values = templatefile("${path.module}/storage-fss.yaml.tmpl", {
-    fss_ocid  = oci_file_storage_mount_target.mount_target.id
-    fss_path  = oci_file_storage_export.file_export.path
-    fss_ip    = data.oci_core_private_ip.mount_ip.ip_address
-    pool_name = oci_containerengine_node_pool.multi_ad_pool.name
+    fss_volume_handle = var.fss_volume_handle
+    pool_name         = oci_containerengine_node_pool.multi_ad_pool.name
   })
 }
 

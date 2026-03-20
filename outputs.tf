@@ -1,6 +1,7 @@
 output "access_information" {
   value = {
-    kubectl = module.oci-hpc-oke.access_k8s_public_endpoint
+    kubectl  = module.oci-hpc-oke.access_k8s_public_endpoint
+    operator = var.additional_nodes ? module.oci-hpc-oke.operator_ssh_command : null
   }
 }
 
@@ -18,4 +19,15 @@ output "self_managed_instance" {
     cloud_init = local.manual_cloud_init
     os_image   = data.oci_core_image.oke.display_name
   } : null
+}
+
+output "lb_info" {
+  value = {
+    compartment = var.compartment_ocid
+    lb_subnet   = module.oci-hpc-oke.pub_lb_subnet_id
+  }
+}
+
+output "fss_info" {
+  value = anytrue([var.multi_ad_pool, var.additional_fss]) ? module.fss[0].fss_volume_handle : null
 }

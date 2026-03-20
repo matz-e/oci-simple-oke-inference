@@ -27,8 +27,8 @@ module "oci-hpc-oke" {
   kubernetes_version = var.kubernetes_version
 
   # Challenge requirements
-  create_bastion     = false
-  create_operator    = false
+  create_bastion     = var.additional_nodes
+  create_operator    = var.additional_nodes
   install_monitoring = false
 
   # Keep the basic GPU plugin
@@ -62,6 +62,36 @@ resource "oci_containerengine_addon" "metrics_addon" {
   depends_on                       = [oci_containerengine_addon.certificate_addon]
 }
 
+# resource "oci_containerengine_addon" "ingress_addon" {
+#   addon_name                       = "NativeIngressController"
+#   cluster_id                       = module.oci-hpc-oke.cluster_id
+#   remove_addon_resources_on_delete = true
+#   depends_on                       = [oci_containerengine_addon.certificate_addon]
+#
+#   configurations {
+#     key   = "compartmentId"
+#     value = var.compartment_ocid
+#   }
+#
+#   configurations {
+#     key   = "loadBalancerSubnetId"
+#     value = module.oci-hpc-oke.pub_lb_subnet_id
+#   }
+# }
+
+module "fss" {
+  source = "./fss"
+
+  count = var.multi_ad_pool ? 1 : (var.additional_fss ? 1 : 0)
+
+  tenancy_ocid     = var.tenancy_ocid
+  compartment_ocid = var.compartment_ocid
+  subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
+  subnet_cidr      = module.oci-hpc-oke.worker_subnet_cidr
+  nsg_ocid         = module.oci-hpc-oke.worker_nsg_id
+  vcn_ocid         = module.oci-hpc-oke.vcn_id
+}
+
 module "multi_ad_pool" {
   source = "./multi_ad_pool"
 
@@ -70,9 +100,9 @@ module "multi_ad_pool" {
   tenancy_ocid     = var.tenancy_ocid
   compartment_ocid = var.compartment_ocid
   subnet_ocid      = module.oci-hpc-oke.worker_subnet_id
-  subnet_cidr      = module.oci-hpc-oke.worker_subnet_cidr
   nsg_ocid         = module.oci-hpc-oke.worker_nsg_id
-  vcn_ocid         = module.oci-hpc-oke.vcn_id
+
+  fss_volume_handle = module.fss[0].fss_volume_handle
 
   oke_cluster_ocid = module.oci-hpc-oke.cluster_id
   oke_image_ocid   = var.oke_image_ocid

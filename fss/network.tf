@@ -9,7 +9,7 @@ locals {
 }
 
 resource "oci_core_network_security_group_security_rule" "ingress_tcp_multiports" {
-  count                     = 4
+  count                     = 2
   network_security_group_id = oci_core_network_security_group.fss_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
@@ -17,8 +17,8 @@ resource "oci_core_network_security_group_security_rule" "ingress_tcp_multiports
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = [111, 2048, 2049, 2050][count.index]
-      max = [111, 2048, 2049, 2050][count.index]
+      min = [111, 2048][count.index]
+      max = [111, 2050][count.index]
     }
   }
   stateless = false
@@ -34,14 +34,14 @@ resource "oci_core_network_security_group_security_rule" "ingress_udp" {
   udp_options {
     destination_port_range {
       min = [111, 2048][count.index]
-      max = [111, 2048][count.index]
+      max = [111, 2050][count.index]
     }
   }
   stateless = false
 }
 
 resource "oci_core_network_security_group_security_rule" "egress_tcp" {
-  count                     = 4
+  count                     = 2
   network_security_group_id = oci_core_network_security_group.fss_nsg.id
   direction                 = "EGRESS"
   protocol                  = "6" # TCP
@@ -49,8 +49,8 @@ resource "oci_core_network_security_group_security_rule" "egress_tcp" {
   destination_type          = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = [111, 2048, 2049, 2050][count.index]
-      max = [111, 2048, 2049, 2050][count.index]
+      min = [111, 2048][count.index]
+      max = [111, 2050][count.index]
     }
   }
   stateless = false

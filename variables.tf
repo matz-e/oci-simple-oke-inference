@@ -47,3 +47,13 @@ variable "scheduling_pools" {
   type    = bool
   default = false
 }
+
+variable "additional_nodes" {
+  type    = bool
+  default = false
+}
+
+variable "additional_fss" {
+  type    = bool
+  default = false
+}

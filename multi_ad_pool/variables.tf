@@ -10,15 +10,7 @@ variable "subnet_ocid" {
   type = string
 }
 
-variable "subnet_cidr" {
-  type = string
-}
-
 variable "nsg_ocid" {
-  type = string
-}
-
-variable "vcn_ocid" {
   type = string
 }
 
@@ -34,4 +26,8 @@ variable "oke_image_ocid" {
 variable "kubernetes_version" {
   type    = string
   default = "v1.34.1"
+}
+
+variable "fss_volume_handle" {
+  type = string
 }
